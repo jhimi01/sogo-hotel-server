@@ -40,7 +40,18 @@ async function run() {
     const bookingCollection = client.db('sogoHotel').collection('bookings');
 
 //   save user email and role in db
+app.put('/users/:email', async(req, res) =>{
+  const email = req.params.email;
 
+  const user = req.body
+  const query = { email: email}
+  const options = { upsert: true }
+  const updateDoc = {
+    $set: user
+  }
+  const result = await userCollection.updateOne(query, updateDoc ,options);
+  res.send(result)
+})
 
 
 
