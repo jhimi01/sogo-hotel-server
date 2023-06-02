@@ -15,7 +15,7 @@ app.use(cors());
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.SOGO_USER}:${process.env.SOGO_PASS}@cluster0.ysrfscy.mongodb.net/?retryWrites=true&w=majority`;
 
 // console.log(uri)
@@ -53,6 +53,32 @@ app.put('/users/:email', async(req, res) =>{
   res.send(result)
 })
 
+
+// get all rooms
+app.get('/rooms', async(req, res) =>{
+  
+  const result = await roomCollection.find().toArray();
+  res.send(result)
+})
+
+
+// get a single room
+app.get('/room/:id', async(req, res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)};
+  const result = await roomCollection.findOne(query)
+  res.send(result)
+})
+
+
+
+// save a room in database
+app.post('/rooms', async(req, res) =>{
+  const room = req.body
+  console.log(room)
+  const result = await roomCollection.insertOne(room)
+  res.send(result)
+})
 
 
 
