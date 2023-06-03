@@ -70,10 +70,29 @@ app.get('/rooms', async(req, res) =>{
   res.send(result)
 })
 
+// delete rooms
+app.delete('/room/:id', async(req, res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)};
+  const result = await roomCollection.deleteOne(query)
+  res.send(result)
+})
+
+
+
+// get a single by email of host
+app.get('/room/:email', async(req, res) =>{
+  const email = req.params.email;
+  const query = { 'host.email' : email };
+  const result = await roomCollection.find(query).toArray();
+  res.send(result)
+})
+
 
 // get a single room
 app.get('/room/:id', async(req, res) =>{
   const id = req.params.id;
+  console.log(id)
   const query = {_id: new ObjectId(id)};
   const result = await roomCollection.findOne(query)
   res.send(result)
@@ -84,15 +103,15 @@ app.get('/room/:id', async(req, res) =>{
 // save a room in database
 app.post('/rooms', async(req, res) =>{
   const room = req.body
-  console.log(room)
+  // console.log(room)
   const result = await roomCollection.insertOne(room)
   res.send(result)
 })
 
 // update room booking status
 app.patch('/rooms/status/:id', async(req, res) =>{
-  const id = req.params.id;
   const status = req.body.status
+  const id = req.params.id;
   const query = {_id: new ObjectId(id)};
   const updateDoc = {
     $set: {
@@ -103,6 +122,21 @@ app.patch('/rooms/status/:id', async(req, res) =>{
   res.send(update)
 });
 
+
+
+// get bookings for guest
+app.get('/bookings', async(req, res) =>{
+  const email = req.query.email
+
+  if (!email) {
+    res.send([])
+  }
+  const query = {'guest.email': email}
+  const result = await bookingCollection.find(query).toArray()
+  res.send(result)
+})
+
+
 // save a booking in database
 app.post('/bookings', async(req, res) =>{
   const booking = req.body
@@ -110,6 +144,15 @@ app.post('/bookings', async(req, res) =>{
   const result = await bookingCollection.insertOne(booking)
   res.send(result)
 })
+
+
+app.delete('/bookings/:id', async(req, res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)};
+  const result = await bookingCollection.deleteOne(query)
+  res.send(result)
+});
+
 
 
 
