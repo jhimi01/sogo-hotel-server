@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
+var morgan = require('morgan')
 const port = process.env.PORT || 5000;
 
 // YOIgtE0PsoKuds0R
@@ -11,6 +12,7 @@ const port = process.env.PORT || 5000;
 // middleware 
 app.use(express.json());
 app.use(cors());
+app.use (morgan('dev'))
 
 
 
@@ -65,7 +67,6 @@ app.get('/users/:email', async(req, res) =>{
 
 // get all rooms
 app.get('/rooms', async(req, res) =>{
-  
   const result = await roomCollection.find().toArray();
   res.send(result)
 })
@@ -92,12 +93,11 @@ app.get('/room/:email', async(req, res) =>{
 // get a single room
 app.get('/room/:id', async(req, res) =>{
   const id = req.params.id;
-  console.log(id)
+  // console.log(id)
   const query = {_id: new ObjectId(id)};
   const result = await roomCollection.findOne(query)
   res.send(result)
 })
-
 
 
 // save a room in database
@@ -136,11 +136,23 @@ app.get('/bookings', async(req, res) =>{
   res.send(result)
 })
 
+// get bookings for host
+app.get('/bookings/host', async(req, res) =>{
+  const email = req.query.email
+
+  if (!email) {
+    res.send([])
+  }
+  const query = {host: email}
+  const result = await bookingCollection.find(query).toArray()
+  res.send(result)
+})
+
 
 // save a booking in database
 app.post('/bookings', async(req, res) =>{
   const booking = req.body
-  console.log(booking)
+  // console.log(booking)
   const result = await bookingCollection.insertOne(booking)
   res.send(result)
 })
