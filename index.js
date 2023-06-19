@@ -65,24 +65,17 @@ app.get('/users/:email', async(req, res) =>{
 
 
 
+
 // get all rooms
 app.get('/rooms', async(req, res) =>{
   const result = await roomCollection.find().toArray();
   res.send(result)
 })
 
-// delete rooms
-app.delete('/room/:id', async(req, res) =>{
-  const id = req.params.id;
-  const query = {_id: new ObjectId(id)};
-  const result = await roomCollection.deleteOne(query)
-  res.send(result)
-})
-
 
 
 // get a single by email of host
-app.get('/room/:email', async(req, res) =>{
+app.get('/rooms/:email', async(req, res) =>{
   const email = req.params.email;
   const query = { 'host.email' : email };
   const result = await roomCollection.find(query).toArray();
@@ -93,7 +86,7 @@ app.get('/room/:email', async(req, res) =>{
 // get a single room
 app.get('/room/:id', async(req, res) =>{
   const id = req.params.id;
-  // console.log(id)
+  console.log(id)
   const query = {_id: new ObjectId(id)};
   const result = await roomCollection.findOne(query)
   res.send(result)
@@ -105,6 +98,30 @@ app.post('/rooms', async(req, res) =>{
   const room = req.body
   // console.log(room)
   const result = await roomCollection.insertOne(room)
+  res.send(result)
+})
+
+
+// delete rooms
+app.delete('/room/:id', async(req, res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)};
+  const result = await roomCollection.deleteOne(query)
+  res.send(result)
+})
+
+
+
+
+// get bookings for host
+app.get('/bookings/host', async(req, res) =>{
+  const email = req.query.email
+
+  if (!email) {
+    res.send([])
+  }
+  const query = {host: email}
+  const result = await bookingCollection.find(query).toArray()
   res.send(result)
 })
 
@@ -124,6 +141,16 @@ app.patch('/rooms/status/:id', async(req, res) =>{
 
 
 
+
+// save a booking in database
+app.post('/bookings', async(req, res) =>{
+  const booking = req.body
+  // console.log(booking)
+  const result = await bookingCollection.insertOne(booking)
+  res.send(result)
+})
+
+
 // get bookings for guest
 app.get('/bookings', async(req, res) =>{
   const email = req.query.email
@@ -133,27 +160,6 @@ app.get('/bookings', async(req, res) =>{
   }
   const query = {'guest.email': email}
   const result = await bookingCollection.find(query).toArray()
-  res.send(result)
-})
-
-// get bookings for host
-app.get('/bookings/host', async(req, res) =>{
-  const email = req.query.email
-
-  if (!email) {
-    res.send([])
-  }
-  const query = {host: email}
-  const result = await bookingCollection.find(query).toArray()
-  res.send(result)
-})
-
-
-// save a booking in database
-app.post('/bookings', async(req, res) =>{
-  const booking = req.body
-  // console.log(booking)
-  const result = await bookingCollection.insertOne(booking)
   res.send(result)
 })
 
