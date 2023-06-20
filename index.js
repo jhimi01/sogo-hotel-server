@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
+const jwt = require('jsonwebtoken')
 var morgan = require('morgan')
 const port = process.env.PORT || 5000;
 
@@ -31,6 +32,13 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+// verifyJWT
+const verifyJWT = (req, res, next) =>{
+  
+}
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -40,6 +48,17 @@ async function run() {
     const userCollection = client.db('sogoHotel').collection('users');
     const roomCollection = client.db('sogoHotel').collection('rooms');
     const bookingCollection = client.db('sogoHotel').collection('bookings');
+
+
+    // generate jwt token
+    app.post('/jwt', (req, res) => {
+     const email = req.body;
+     const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '7d'})
+     console.log(token);
+     res.send({token});
+    })
+
+
 
 //   save user email and role in db
 app.put('/users/:email', async(req, res) =>{
