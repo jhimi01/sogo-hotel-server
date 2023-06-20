@@ -112,19 +112,6 @@ app.delete('/room/:id', async(req, res) =>{
 
 
 
-
-// get bookings for host
-app.get('/bookings/host', async(req, res) =>{
-  const email = req.query.email
-
-  if (!email) {
-    res.send([])
-  }
-  const query = {host: email}
-  const result = await bookingCollection.find(query).toArray()
-  res.send(result)
-})
-
 // update room booking status
 app.patch('/rooms/status/:id', async(req, res) =>{
   const status = req.body.status
@@ -151,6 +138,8 @@ app.post('/bookings', async(req, res) =>{
 })
 
 
+
+
 // get bookings for guest
 app.get('/bookings', async(req, res) =>{
   const email = req.query.email
@@ -162,6 +151,22 @@ app.get('/bookings', async(req, res) =>{
   const result = await bookingCollection.find(query).toArray()
   res.send(result)
 })
+
+
+
+// get bookings for host
+app.get('/bookings/host', async(req, res) =>{
+  const email = req.query.email
+
+  if (!email) {
+    res.send([])
+  }
+  const query = {host: email}
+  const result = await bookingCollection.find(query).toArray()
+  res.send(result)
+})
+
+
 
 
 app.delete('/bookings/:id', async(req, res) =>{
