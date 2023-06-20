@@ -21,7 +21,7 @@ app.use (morgan('dev'))
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.SOGO_USER}:${process.env.SOGO_PASS}@cluster0.ysrfscy.mongodb.net/?retryWrites=true&w=majority`;
 
-// console.log(uri)
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -35,7 +35,23 @@ const client = new MongoClient(uri, {
 
 // verifyJWT
 const verifyJWT = (req, res, next) =>{
-  
+  const authorization = req.headers.authorization;
+  if(!authorization){
+   return res.status(401).send({ error: true, message: 'Unauthorized Access' })
+  }
+  console.log(authorization)
+  const token = authorization.split(' ')[1]
+  console.log(token)
+  // token verify
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
+    if (error){
+      return res.status(401).send({ error: true, message: 'Unauthorized Access' })
+    }
+    req.decoded = decoded
+    next()
+  })
+
+
 }
 
 
@@ -54,7 +70,6 @@ async function run() {
     app.post('/jwt', (req, res) => {
      const email = req.body;
      const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '7d'})
-     console.log(token);
      res.send({token});
     })
 
@@ -94,8 +109,13 @@ app.get('/rooms', async(req, res) =>{
 
 
 // get a single by email of host
-app.get('/rooms/:email', async(req, res) =>{
+app.get('/rooms/:email', verifyJWT,  async(req, res) =>{
+  const decodedEmail = req.decoded.email
+  console.log(decodedEmail)
   const email = req.params.email;
+  if (decodedEmail !== email) {
+    return res.status(403).send({ error: true, message: 'Forbidden Access' })
+  }
   const query = { 'host.email' : email };
   const result = await roomCollection.find(query).toArray();
   res.send(result)
@@ -105,7 +125,6 @@ app.get('/rooms/:email', async(req, res) =>{
 // get a single room
 app.get('/room/:id', async(req, res) =>{
   const id = req.params.id;
-  console.log(id)
   const query = {_id: new ObjectId(id)};
   const result = await roomCollection.findOne(query)
   res.send(result)
@@ -115,7 +134,6 @@ app.get('/room/:id', async(req, res) =>{
 // save a room in database
 app.post('/rooms', async(req, res) =>{
   const room = req.body
-  // console.log(room)
   const result = await roomCollection.insertOne(room)
   res.send(result)
 })
@@ -151,7 +169,6 @@ app.patch('/rooms/status/:id', async(req, res) =>{
 // save a booking in database
 app.post('/bookings', async(req, res) =>{
   const booking = req.body
-  // console.log(booking)
   const result = await bookingCollection.insertOne(booking)
   res.send(result)
 })
