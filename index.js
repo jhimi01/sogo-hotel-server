@@ -66,6 +66,17 @@ async function run() {
     const bookingCollection = client.db('sogoHotel').collection('bookings');
 
 
+    // generate client screte 
+    app.post('/create-payment-intent', verifyJWT, async(req, res)=>{
+      const price = req.body;
+      if (price) {
+        const amount = parseFloat(price * 100)
+      }
+    })
+
+
+
+
     // generate jwt token
     app.post('/jwt', (req, res) => {
      const email = req.body;
