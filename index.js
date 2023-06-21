@@ -5,6 +5,9 @@ const cors = require('cors')
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 var morgan = require('morgan')
+// This is your test secret API key.
+const stripe = require("stripe")(process.env.VITE_PAYMENT_GATEWAY_SCREETE);
+
 const port = process.env.PORT || 5000;
 
 // YOIgtE0PsoKuds0R
@@ -71,7 +74,15 @@ async function run() {
       const price = req.body;
       if (price) {
         const amount = parseFloat(price * 100)
+        const paymentIntent = await stripe.paymentIntent.create({
+          amount: amount,
+          currency: 'USD',
+          payment_method_types: ['card'],
+        })
       }
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      })
     })
 
 
