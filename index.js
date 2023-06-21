@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
+const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken')
 var morgan = require('morgan')
 // This is your test secret API key.
@@ -42,9 +43,7 @@ const verifyJWT = (req, res, next) =>{
   if(!authorization){
    return res.status(401).send({ error: true, message: 'Unauthorized Access' })
   }
-  console.log(authorization)
   const token = authorization.split(' ')[1]
-  console.log(token)
   // token verify
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
     if (error){
@@ -71,18 +70,18 @@ async function run() {
 
     // generate client screte 
     app.post('/create-payment-intent', verifyJWT, async(req, res)=>{
-      const price = req.body;
+      const {price} = req.body;
       if (price) {
         const amount = parseFloat(price * 100)
-        const paymentIntent = await stripe.paymentIntent.create({
+        const paymentIntent = await stripe.paymentIntents.create({
           amount: amount,
           currency: 'USD',
           payment_method_types: ['card'],
         })
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        })
       }
-      res.send({
-        clientSecret: paymentIntent.client_secret,
-      })
     })
 
 
@@ -133,7 +132,6 @@ app.get('/rooms', async(req, res) =>{
 // get a single by email of host
 app.get('/rooms/:email', verifyJWT,  async(req, res) =>{
   const decodedEmail = req.decoded.email
-  console.log(decodedEmail)
   const email = req.params.email;
   if (decodedEmail !== email) {
     return res.status(403).send({ error: true, message: 'Forbidden Access' })
@@ -192,6 +190,12 @@ app.patch('/rooms/status/:id', async(req, res) =>{
 app.post('/bookings', async(req, res) =>{
   const booking = req.body
   const result = await bookingCollection.insertOne(booking)
+  //  send confirmation email to guest account
+
+
+  //  send confirmation email to host account
+
+
   res.send(result)
 })
 
