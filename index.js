@@ -167,6 +167,19 @@ app.delete('/room/:id', async(req, res) =>{
   res.send(result)
 })
 
+// update room info
+app.put('/room/:id', async(req, res)=>{
+  const room = req.body;
+const id = req.params.id;
+const filter = {_id: new ObjectId(id)};
+const options = {upsert: true}
+const updateDoc ={
+  $set: room,
+}
+const result = await roomCollection.updateOne(filter, updateDoc, options)
+res.send(result)
+})
+
 
 
 // update room booking status
